@@ -1,0 +1,96 @@
+[gd_scene load_steps=5 format=3 uid="uid://w0qqsv5x8jxu"]
+
+[ext_resource type="FontFile" uid="uid://comwwbi13tbv" path="res://assets/Roboto-Regular.ttf" id="1"]
+[ext_resource type="Script" path="res://Main.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://b1q6lts4lwuhb" path="res://image.jpg" id="3"]
+
+[sub_resource type="FontFile" id="1"]
+fallbacks = Array[Font]([ExtResource("1")])
+face_index = null
+embolden = null
+transform = null
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
+
+[node name="Main" type="Node"]
+script = ExtResource("2")
+
+[node name="Canvas" type="CanvasLayer" parent="."]
+
+[node name="Center" type="CenterContainer" parent="Canvas"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Canvas/Center"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="Image" type="TextureRect" parent="Canvas/Center/VBox"]
+layout_mode = 2
+texture = ExtResource("3")
+
+[node name="Title" type="VBoxContainer" parent="Canvas/Center/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Canvas/Center/VBox/Title"]
+layout_mode = 2
+text = "Title"
+
+[node name="TextEdit" type="TextEdit" parent="Canvas/Center/VBox/Title"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+text = "Hello world"
+
+[node name="Subject" type="VBoxContainer" parent="Canvas/Center/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Canvas/Center/VBox/Subject"]
+layout_mode = 2
+text = "Subject"
+
+[node name="TextEdit" type="TextEdit" parent="Canvas/Center/VBox/Subject"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+text = "Godot Share Plugin"
+
+[node name="Content" type="VBoxContainer" parent="Canvas/Center/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Canvas/Center/VBox/Content"]
+layout_mode = 2
+text = "Content"
+
+[node name="TextEdit" type="TextEdit" parent="Canvas/Center/VBox/Content"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+text = "I'm blue Da ba dee da ba di"
+
+[node name="ShareTextBtn" type="Button" parent="Canvas/Center/VBox"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("1")
+text = "Share Text"
+
+[node name="ShareImageBtn" type="Button" parent="Canvas/Center/VBox"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("1")
+text = "Share Image"
+
+[node name="ShareCapturedScreenBtn" type="Button" parent="Canvas/Center/VBox"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("1")
+text = "Share Captured Screen"
+
+[node name="SaveImageToGalleryBtn" type="Button" parent="Canvas/Center/VBox"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("1")
+text = "Save Image To Gallery"
+
+[connection signal="pressed" from="Canvas/Center/VBox/ShareTextBtn" to="." method="_on_ShareTextBtn_pressed"]
+[connection signal="pressed" from="Canvas/Center/VBox/ShareImageBtn" to="." method="_on_ShareImageBtn_pressed"]
+[connection signal="pressed" from="Canvas/Center/VBox/ShareCapturedScreenBtn" to="." method="_on_ShareCapturedScreenBtn_pressed"]
+[connection signal="pressed" from="Canvas/Center/VBox/SaveImageToGalleryBtn" to="." method="_on_SaveImageToGalleryBtn_pressed"]

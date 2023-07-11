@@ -1,0 +1,17 @@
+[config]
+name="Share"
+binary="share.a"
+
+initialization="register_share_types"
+deinitialization="unregister_share_types"
+
+[dependencies]
+linked=[]
+embedded=[]
+system=[]
+
+capabilities=[]
+
+files=[]
+
+[plist]
