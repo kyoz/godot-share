@@ -73,6 +73,15 @@ Then you can easily use it anywhere with:
 
 ```gdscript
 Share.init()
+
+Share.shareText(title, subject, content)
+Share.shareImage(image_path, title, subject, content)
+
+# Godot 3
+Share.connect("on_error", self, "_on_error")
+
+# Godot 4
+LocalNotification.on_error.connect(_on_error)
 ```
 
 Why have to call `init()`. Well, if you don't want to call init, you can change `init()` to `_ready()` on the `autoload` file. But for my experience when using a lots of plugin, init all plugins on `_ready()` is not a good idea. So i let you choose whenever you init the plugin. When showing a loading scene...etc...
