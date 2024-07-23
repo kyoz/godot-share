@@ -18,7 +18,7 @@ func init():
 
 
 func init_signals():
-	share.connect("error", self, "_on_error")
+	share.connect("share_error", self, "_on_error")
 
 
 func init_android_gallery_image_dir():
@@ -76,7 +76,7 @@ func shareCapturedScreen(title, subject, content):
 	if task == OK:
 		shareImage(save_path, title, subject, content)
 	else:
-		emit_signal("error", "ERROR_SHARE_CAPTURE_SCREEN");
+		emit_signal("on_error", "ERROR_SHARE_CAPTURE_SCREEN");
 	
 	is_capturing = false
 

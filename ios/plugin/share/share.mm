@@ -36,7 +36,7 @@ Share *Share::get_singleton() {
 
 
 void Share::_bind_methods() {
-    ADD_SIGNAL(MethodInfo("error", PropertyInfo(Variant::STRING, "error_code")));
+    ADD_SIGNAL(MethodInfo("share_error", PropertyInfo(Variant::STRING, "error_code")));
     ADD_SIGNAL(MethodInfo("saved_to_gallery"));
 
     ClassDB::bind_method("shareText", &Share::shareText);
@@ -79,7 +79,7 @@ void Share::shareImage(const String &image_path, const String &title, const Stri
     UIImage *image = [UIImage imageWithContentsOfFile:imagePath];
     
     if (image == nil) {
-        emit_signal("error", "ERROR_IMAGE_FILE");
+        emit_signal("share_error", "ERROR_IMAGE_FILE");
         return;
     }
     

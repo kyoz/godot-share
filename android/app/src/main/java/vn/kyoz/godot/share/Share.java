@@ -37,7 +37,7 @@ public class Share extends GodotPlugin {
     public Set<SignalInfo> getPluginSignals() {
         Set<SignalInfo> signals = new ArraySet<>();
 
-        signals.add(new SignalInfo("error", String. class));
+        signals.add(new SignalInfo("share_error", String. class));
 
         return signals;
     }
@@ -63,7 +63,7 @@ public class Share extends GodotPlugin {
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "ERROR_IMAGE_FILE");
             Log.e(TAG, e.getMessage());
-            emitSignal("error", "ERROR_IMAGE_FILE");
+            emitSignal("share_error", "ERROR_IMAGE_FILE");
             return;
         }
 
