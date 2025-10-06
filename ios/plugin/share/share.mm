@@ -7,7 +7,8 @@
 
 #ifdef VERSION_4_0
 #include "core/object/class_db.h"
-#include "platform/ios/app_delegate.h"
+// #include "platform/ios/app_delegate.h"
+#import <UIKit/UIKit.h>
 #else
 #include "core/class_db.h"
 #include "platform/iphone/app_delegate.h"
