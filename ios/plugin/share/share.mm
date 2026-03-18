@@ -71,35 +71,40 @@ void Share::shareText(const String &title, const String &subject, const String &
 
 void Share::shareImage(const String &image_path, const String &title, const String &subject, const String &content) {
     NSLog(@"[GodotShare] called shareImage()");
-
-    UIViewController *root_controller = [[UIApplication sharedApplication] delegate].window.rootViewController;
     
-    NSString * shareMessage = [NSString stringWithCString:content.utf8().get_data() encoding:NSUTF8StringEncoding];
-    NSString * imagePath = [NSString stringWithCString:image_path.utf8().get_data() encoding:NSUTF8StringEncoding];
-    
+    // Chuyển các biến Godot String sang NSString trước khi vào block
+    NSString *shareMessage = [NSString stringWithCString:content.utf8().get_data() encoding:NSUTF8StringEncoding];
+    NSString *imagePath = [NSString stringWithCString:image_path.utf8().get_data() encoding:NSUTF8StringEncoding];
     UIImage *image = [UIImage imageWithContentsOfFile:imagePath];
-    
+
     if (image == nil) {
+        NSLog(@"[GodotShare] Image is NIL!");
         emit_signal("share_error", "ERROR_IMAGE_FILE");
         return;
     }
-    
-    NSArray * shareItems = @[shareMessage, image];
-    
-    UIActivityViewController * avc = [[UIActivityViewController alloc] initWithActivityItems:shareItems applicationActivities:nil];
-    // iPhone
-    if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone) {
-        [root_controller presentViewController:avc animated:YES completion:nil];
-    }
-    // iPad
-    else {
-        // Change Rect to position Popover
-        avc.modalPresentationStyle = UIModalPresentationPopover;
-        avc.popoverPresentationController.sourceView = root_controller.view;
-        avc.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(root_controller.view.bounds), CGRectGetMidY(root_controller.view.bounds),0,0);
-        avc.popoverPresentationController.permittedArrowDirections = UIPopoverArrowDirection(0);
-        [root_controller presentViewController:avc animated:YES completion:nil];
-    }
+
+    // Đẩy việc hiển thị UI lên Main Thread
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIViewController *root_controller = [UIApplication sharedApplication].keyWindow.rootViewController;
+        
+        // Đảm bảo lấy đúng controller đang hiển thị (phòng trường hợp đang có popup khác)
+        while (root_controller.presentedViewController) {
+            root_controller = root_controller.presentedViewController;
+        }
+
+        NSArray *shareItems = @[shareMessage, image];
+        UIActivityViewController *avc = [[UIActivityViewController alloc] initWithActivityItems:shareItems applicationActivities:nil];
+
+        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone) {
+            [root_controller presentViewController:avc animated:YES completion:nil];
+        } else {
+            avc.modalPresentationStyle = UIModalPresentationPopover;
+            avc.popoverPresentationController.sourceView = root_controller.view;
+            avc.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(root_controller.view.bounds), CGRectGetMidY(root_controller.view.bounds),0,0);
+            avc.popoverPresentationController.permittedArrowDirections = UIPopoverArrowDirection(0);
+            [root_controller presentViewController:avc animated:YES completion:nil];
+        }
+    });
 }
 
 void Share::saveImageToGallery(const String &image_path) {
