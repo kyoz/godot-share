@@ -72,36 +72,78 @@ void Share::shareText(const String &title, const String &subject, const String &
 void Share::shareImage(const String &image_path, const String &title, const String &subject, const String &content) {
     NSLog(@"[GodotShare] called shareImage()");
     
-    // Chuyển các biến Godot String sang NSString trước khi vào block
+    // 1. Chuyển đổi toàn bộ string từ Godot sang NSString
     NSString *shareMessage = [NSString stringWithCString:content.utf8().get_data() encoding:NSUTF8StringEncoding];
-    NSString *imagePath = [NSString stringWithCString:image_path.utf8().get_data() encoding:NSUTF8StringEncoding];
+    NSString *shareTitle   = [NSString stringWithCString:title.utf8().get_data() encoding:NSUTF8StringEncoding];
+    NSString *shareSubject = [NSString stringWithCString:subject.utf8().get_data() encoding:NSUTF8StringEncoding];
+    NSString *imagePath   = [NSString stringWithCString:image_path.utf8().get_data() encoding:NSUTF8StringEncoding];
+    
+    // 2. Load ảnh từ path
     UIImage *image = [UIImage imageWithContentsOfFile:imagePath];
 
     if (image == nil) {
-        NSLog(@"[GodotShare] Image is NIL!");
+        NSLog(@"[GodotShare] Image is NIL at path: %@", imagePath);
         emit_signal("share_error", "ERROR_IMAGE_FILE");
         return;
     }
 
-    // Đẩy việc hiển thị UI lên Main Thread
+    // 3. Đẩy việc hiển thị UI lên Main Thread để tránh crash
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIViewController *root_controller = [UIApplication sharedApplication].keyWindow.rootViewController;
+        UIWindow *window = nil;
         
-        // Đảm bảo lấy đúng controller đang hiển thị (phòng trường hợp đang có popup khác)
+        // Lấy Window chuẩn cho iOS 13+ và Fallback cho máy cổ (iPhone 5S)
+        if (@available(iOS 13.0, *)) {
+            for (UIScene* scene in UIApplication.sharedApplication.connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                    window = ((UIWindowScene *)scene).windows.firstObject;
+                    break;
+                }
+            }
+        }
+        
+        if (!window) {
+            window = [UIApplication sharedApplication].keyWindow;
+        }
+
+        if (!window || !window.rootViewController) {
+            NSLog(@"[GodotShare] Could not find rootViewController!");
+            return;
+        }
+
+        UIViewController *root_controller = window.rootViewController;
+        
+        // Tìm Controller đang hiển thị trên cùng (tránh bị đè bởi popup khác)
         while (root_controller.presentedViewController) {
             root_controller = root_controller.presentedViewController;
         }
 
+        // 4. Chuẩn bị các item để share
+        // Thường shareItems gồm Message và Image là đủ cho hầu hết các App
         NSArray *shareItems = @[shareMessage, image];
+        
         UIActivityViewController *avc = [[UIActivityViewController alloc] initWithActivityItems:shareItems applicationActivities:nil];
 
+        // 5. Gán Title và Subject (Cực kỳ quan trọng khi share qua Email/Notes)
+        if (shareSubject.length > 0) {
+            [avc setValue:shareSubject forKey:@"subject"];
+        }
+        
+        // Nếu title khác subject thì có thể dùng title làm tiêu đề chung
+        if (shareTitle.length > 0 && ![shareTitle isEqualToString:shareSubject]) {
+            // Một số app dùng key "title", một số dùng "header"
+            [avc setValue:shareTitle forKey:@"title"];
+        }
+
+        // 6. Hiển thị bảng Share
         if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone) {
+            // iPhone hiện từ dưới lên
             [root_controller presentViewController:avc animated:YES completion:nil];
         } else {
+            // iPad hiện dạng Popover ở giữa màn hình (tránh crash)
             avc.modalPresentationStyle = UIModalPresentationPopover;
             avc.popoverPresentationController.sourceView = root_controller.view;
-            avc.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(root_controller.view.bounds), CGRectGetMidY(root_controller.view.bounds),0,0);
-            avc.popoverPresentationController.permittedArrowDirections = UIPopoverArrowDirection(0);
+            avc.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(root_controller.view.bounds), CGRectGetMidY(root_controller.view.bounds), 0, 0);
+            avc.popoverPresentationController.permittedArrowDirections = 0; // Không hiện mũi tên chỉ trỏ
             [root_controller presentViewController:avc animated:YES completion:nil];
         }
     });
